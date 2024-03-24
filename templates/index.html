@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Files</title>
+    <link rel="icon" type="image/x-icon" href="/static/icon.svg">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body>
+    <nav>
+        <div class="btn-container">
+            <!-- <button class="btn-upload"><i class="fa fa-upload" aria-hidden="true"></i>Upload</button> -->
+            <label class="btn-upload" id="uploadlbl">
+                <input type="file" id="file2upload" name="file2upload" accept="." style="display: none;" oninput="uploadHandler(this,'{{ navigation[-1][0] }}')" multiple/>
+                <div id="btn-upload-start" style="display: flex; gap: .5rem;">
+                    <i class="fa fa-upload" aria-hidden="true"></i>
+                    Upload
+                </div>
+                <div id="btn-upload-progress" style="display: none; gap: .5rem; align-items: center;">
+                    <span id="btn-upload-progress-text">0%</span>
+                    <div class="progress-bar" id="btn-upload-progress-bar"></div>
+                </div>
+            </label>
+            <button class="btn-create"><i class="fa fa-plus" aria-hidden="true"></i>Create</button>
+        </div>
+        <div class="inp-container">
+            <input type="text" placeholder="Search files, folders">
+            <button class="btn-search"><i class="fa fa-search"></i></button>
+        </div>
+        
+    </nav>
+    <div class="container" id="containerRoot">
+        <div class="navigation">
+            <a href="/{{ navigation[0][0] }}">{{ navigation[0][1] }}</a>
+            {% for navi in navigation[1:] %}
+                {% if navi[1] %}
+                    <span style="padding: 0 2px 0 2px;">&gt</span>
+                    <a href="/{{ navi[0] }}">{{ navi[1] }}</a>
+                {% endif %}
+            {% endfor %}
+            
+        </div>
+        <div class="header">
+            <div>
+                <input type="checkbox" onclick="headerCheckboxHandler(this)">
+                <span>NAME</span>
+            </div>
+            <div onclick="changeView()">
+                <div class="change-view-btn" id="gridViewIcon" style="padding: 2px;">
+                    <svg width="18px" height="18px" viewBox="0 0 24 24" role="img" xmlns="http://www.w3.org/2000/svg" aria-labelledby="gridLargeIconTitle" stroke="#000000" stroke-width="1" stroke-linecap="square" stroke-linejoin="miter" fill="none" color="#000000"> <title id="gridLargeIconTitle">Large Grid</title> <rect width="7" height="7" x="3" y="3"/> <rect width="7" height="7" x="14" y="3"/> <rect width="7" height="7" x="3" y="14"/> <rect width="7" height="7" x="14" y="14"/> </svg>
+                </div>
+                <div class="change-view-btn"  id="listViewIcon" style="display: none;">
+                    <svg width="22px" height="22px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-labelledby="listViewIconTitle" stroke="#000000" stroke-width="1" stroke-linecap="square" stroke-linejoin="miter" fill="none" color="#000000"> <title id="listViewIconTitle">List view</title> <path d="M5 5H19"/> <path d="M5 19H19"/> <rect x="5" y="9" width="14" height="6"/> </svg>
+                </div>
+            </div>
+        </div>
+        <div class="root" id="rootContainer">
+                {% for file in files %}
+                    <div class="root-ele {{ 'root-ele-file' if file[1] else '' }}">
+                        <input type="checkbox" class="checkboxSelector">
+                        <div class="img">
+                            {% if file[1] %}
+                                <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 72 72"><path fill="#6C87FE" d="M57.5,31h-23c-1.4,0-2.5-1.1-2.5-2.5v-10c0-1.4,1.1-2.5,2.5-2.5h23c1.4,0,2.5,1.1,2.5,2.5v10	C60,29.9,58.9,31,57.5,31z"></path><path fill="#8AA3FF" d="M59.8,61H12.2C8.8,61,6,58,6,54.4V17.6C6,14,8.8,11,12.2,11h18.5c1.7,0,3.3,1,4.1,2.6L38,24h21.8	c3.4,0,6.2,2.4,6.2,6v24.4C66,58,63.2,61,59.8,61z"></path><path display="none" fill="#8AA3FF" d="M62.1,61H9.9C7.8,61,6,59.2,6,57c0,0,0-31.5,0-42c0-2.2,1.8-4,3.9-4h19.3	c1.6,0,3.2,0.2,3.9,2.3l2.7,6.8c0.5,1.1,1.6,1.9,2.8,1.9h23.5c2.2,0,3.9,1.8,3.9,4v31C66,59.2,64.2,61,62.1,61z"></path><path fill="#798BFF" d="M7.7,59c2.2,2.4,4.7,2,6.3,2h45c1.1,0,3.2,0.1,5.3-2H7.7z"></path></svg>
+                            {% else %}
+                                <img src="/static/icons/{{ file[3] }}" id="listViewImg" alt="" >
+                                <img src="/{{ file[4] if file[4] else 'static/icons/'+file[3] }}" alt="" id="gridViewImg" style="display: none;" loading="lazy">
+                            {% endif %}
+                        </div>
+                        <div class="name">
+                            <a href="/{{ file[0] }}">{{ file[2] }}</a>
+                        </div>
+                        <div class="more">
+                            <button onclick="moreClickHandler(this)"><i class="fa fa-ellipsis-h" aria-hidden="true"></i></button>
+                            <!-- <div style="width: 100px; height: 100px; position: absolute; background-color: aqua; left:-85px; top:20px; display: none;"></div> -->
+                            <div class="more-content">
+                                <a href="#">Link 1</a>
+                                <a href="#">Link 2</a>
+                                <a href="#">Link 3</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+                {% if not files %}
+                    <div class="root-ele">
+                        This Folder is Empty Please Upload Some Files.
+                    </div>
+                {% endif %}
+            
+        </div>
+    </div>
+    <div id="uploadShow" style="display: none; width: 100%; height: 100%; background-color: aqua;">
+
+    </div>
+    <script src="/static/js/index.js"></script>
+    <script>
+        let loadidx=1;
+        let loaddone = false;
+        const loadrootContainer = document.getElementById('rootContainer');
+        function loadMore(){
+            if (loaddone){return;}
+            let data = {
+                path: '{{ navigation[-1][0] }}',
+                idx: loadidx
+            };
+            fetch('/api/load', {
+                method: "POST",
+                headers: {'Content-Type': 'application/json'}, 
+                body: JSON.stringify(data)
+            }).then(res=>res.json()).then(res => {
+                console.log(res.files.length);
+                if (res.files.length==0) {
+                    loaddone=true;
+                }
+                res.files.forEach(file => {
+                    let t1 = '';
+                    let tt1 = 'static/icons/'+file[3];
+                    if (file[4]) tt1 = file[4];
+                    let t2 = `<img src="/static/icons/${ file[3] }" id="listViewImg" alt="" >
+                    <img src="/${ tt1 }" alt="" id="gridViewImg" style="display: none;" loading="lazy">`;
+                    if (file[1]) {
+                        t1='root-ele-file';
+                        t2='<svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 72 72"><path fill="#6C87FE" d="M57.5,31h-23c-1.4,0-2.5-1.1-2.5-2.5v-10c0-1.4,1.1-2.5,2.5-2.5h23c1.4,0,2.5,1.1,2.5,2.5v10	C60,29.9,58.9,31,57.5,31z"></path><path fill="#8AA3FF" d="M59.8,61H12.2C8.8,61,6,58,6,54.4V17.6C6,14,8.8,11,12.2,11h18.5c1.7,0,3.3,1,4.1,2.6L38,24h21.8	c3.4,0,6.2,2.4,6.2,6v24.4C66,58,63.2,61,59.8,61z"></path><path display="none" fill="#8AA3FF" d="M62.1,61H9.9C7.8,61,6,59.2,6,57c0,0,0-31.5,0-42c0-2.2,1.8-4,3.9-4h19.3	c1.6,0,3.2,0.2,3.9,2.3l2.7,6.8c0.5,1.1,1.6,1.9,2.8,1.9h23.5c2.2,0,3.9,1.8,3.9,4v31C66,59.2,64.2,61,62.1,61z"></path><path fill="#798BFF" d="M7.7,59c2.2,2.4,4.7,2,6.3,2h45c1.1,0,3.2,0.1,5.3-2H7.7z"></path></svg>'
+                    }
+                    loadrootContainer.innerHTML+=`<div class="root-ele ${ t1 }">
+                        <input type="checkbox" class="checkboxSelector">
+                        <div class="img">
+                            ${t2}
+                        </div>
+                        <div class="name">
+                            <a href="/${ file[0] }">${ file[2] }</a>
+                        </div>
+                        <div class="more">
+                            <button onclick="moreClickHandler(this)"><i class="fa fa-ellipsis-h" aria-hidden="true"></i></button>
+                            <!-- <div style="width: 100px; height: 100px; position: absolute; background-color: aqua; left:-85px; top:20px; display: none;"></div> -->
+                            <div class="more-content">
+                                <a href="#">Link 1</a>
+                                <a href="#">Link 2</a>
+                                <a href="#">Link 3</a>
+                            </div>
+                        </div>
+                    </div>`
+                    // console.log(res.files);
+                });
+                loading=0;
+                loadidx++;
+            })
+        }
+        let loading=0;
+        onscroll = (e)=> {
+            if((loading==0)&&(document.body.scrollHeight-window.innerHeight-document.documentElement.scrollTop<window.innerHeight)){
+                loading = 1;
+                loadMore();
+                console.log("Loading");
+            }
+        }
+    </script>
+</body>
+</html>
