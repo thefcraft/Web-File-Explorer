@@ -7,7 +7,7 @@ video demo [instagram](https://www.instagram.com/p/C4WSZiqINrn/)
 ## Features
 
 - **File Navigation**: Navigate through directories and view files.✅
-- **File Upload**: Easily upload files of various formats.❌
+- **File Upload**: Easily upload files of various formats.✅
 - **File Management**: Perform operations like rename, delete, and move files.❌
 - **Media Viewing:** View videos, PDFs, and listen to music files within the application.❌
 - **User Authentication**: Secure access with user authentication.❌
