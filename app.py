@@ -9,8 +9,8 @@ import cv2
 # flask variables
 app = Flask(__name__)
 
-PATH = r"C:/ThefCraft/"
-# PATH = r'lab'
+# PATH = r"C:/ThefCraft/"
+PATH = r'demoFolder'
 icon_mapping = {
     'ai': 'adobe-illustrator.png',
     'apk': 'apk.png',
