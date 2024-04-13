@@ -7,6 +7,14 @@ function moreClickHandler(e){
     // }
 }
 
+// async function uploadFolder(){
+//     console.log('i run for upload folder');
+//     const dirHandle = await window.showDirectoryPicker();
+    
+//     // run code for dirHandle #TODO
+// }
+
+
 let gridView = false;
 const listViewIcon = document.getElementById('listViewIcon');
 const gridViewIcon = document.getElementById('gridViewIcon');

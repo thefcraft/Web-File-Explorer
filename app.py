@@ -1,13 +1,17 @@
-from flask import Flask, Response, render_template, send_file, jsonify, request
+from flask import Flask, Response, render_template, send_file, jsonify, request, redirect, url_for
 import os
+# from pdf2image import convert_from_bytes
+# from PyPDF2 import PdfWriter, PdfReader
+import io
+import base64
+import cv2
 
 # flask variables
 app = Flask(__name__)
 
-# PATH = r"C:/ThefCraft/"
-PATH = r"."
+PATH = r"C:/ThefCraft/"
+# PATH = r'lab'
 icon_mapping = {
-    
     'ai': 'adobe-illustrator.png',
     'apk': 'apk.png',
     'css': 'css.png',
@@ -59,15 +63,16 @@ icon_mapping = {
     'zip': 'zip.png',
 }
 
-
 def getIcon(path:str):
     ext = os.path.splitext(path)[1].removeprefix('.')
     return icon_mapping.get(ext, "javascript.png")
 def getGridViewIcon(path:str):
     ext = os.path.splitext(path)[1].removeprefix('.')
     if ext in ['png', 'jpg', 'jpeg']:
-        return path
-
+        return f'files/{path}'
+    elif ext in ['mp4', 'webm', 'vob', 'mpg', 'mpeg', 'mkv']:
+        return f'api/getImageFromVideo/{path}' # return f'data:image/png;base64, {base64.b64encode(thumb_buf.tobytes()).decode()}'
+        
 CHUNK_SIZE = 128
 # TEMP_STORAGE = {}
 def preProcesser(path, chunk_idx=0):
@@ -105,6 +110,16 @@ def upload():
         fobj.save(os.path.join(os.path.join(PATH, fpath), fobj.filename))
         print('UPLOADING', fobj.filename, 'TO', os.path.join(os.path.join(PATH, fpath), fobj.filename))
     return 'OK'
+@app.route('/api/getImageFromVideo/<path:path>')
+def getThumbnailFromVideo(path):
+    threshold = 10
+    vcap = cv2.VideoCapture(path)
+    res, im_ar = vcap.read()
+    # while im_ar.mean() < threshold and res: res, im_ar = vcap.read()
+    res, thumb_buf = cv2.imencode('.png', im_ar)
+    bte = thumb_buf.tobytes()
+    vcap.release()
+    return bte
 
 @app.route('/api/load', methods=['POST'])
 def load(): 
@@ -114,18 +129,37 @@ def load():
     return jsonify({
         'files':preProcesser(path, chunk_idx=idx)
         })
+def httpredirect(url):
+    return f'''<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="refresh" content="0; URL='{url}'">
+    <title>Redirecting...</title>
+</head>
+<body>
+    <p>Redirecting to {url}...</p>
+</body>
+</html>'''
+@app.route('/')
+def reload():
+    return httpredirect('/files/')
+    # return redirect('/files/')
 
-@app.route('/', defaults={'path': ''})
-@app.route('/<path:path>')
+@app.route('/files/', defaults={'path': ''})
+@app.route('/files/<path:path>')
 def get_dir(path):
     if not os.path.exists(path) and path == 'favicon.ico': return send_file('./static/icon.svg')
     if not os.path.exists(path) and path == 'favicon.ico': return send_file('./static/icon.svg')
+    if not os.path.realpath(os.path.join(PATH, path)).startswith(os.path.realpath(PATH)):
+        return httpredirect('/files/')
     if os.path.isdir(os.path.join(PATH, path)):
         return render_template('index.html', files=preProcesser(path), navigation=getNavigation(path))
     else:
         return send_file(os.path.join(PATH, path))
+   
+   
     
-    
-
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)#, ssl_context=('cert.pem', 'key.pem'))
+if __name__ == '__main__': 
+    # app.run()
+    app.run(debug=False, host='0.0.0.0', port=80)#, ssl_context=('cert.pem', 'key.pem'))
